@@ -1,7 +1,9 @@
 package io.github.thebusybiscuit.cscorelib2.blocks;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.bukkit.block.Block;
@@ -9,6 +11,15 @@ import org.bukkit.block.BlockFace;
 
 import io.github.thebusybiscuit.cscorelib2.materials.MaterialCollection;
 
+/**
+ * An utility class for finding adjacent and similar {@link Block Blocks} to the given {@link Block}.
+ *
+ * @author TheBusyBiscuit
+ * @author Linox
+ *
+ * @see BlockPosition
+ *
+ */
 public final class Vein {
 	
 	private static final BlockFace[] faces = new BlockFace[] {BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST};
@@ -56,21 +67,26 @@ public final class Vein {
 	 */
 	public static List<Block> find(Block b, int limit, Predicate<Block> predicate) {
 		List<Block> list = new LinkedList<>();
-		expand(b, list, limit, predicate);
+		Set<BlockPosition> used = new HashSet<>();
+		
+		expand(b, list, used, limit, predicate);
 		return list;
 	}
 
-	private static void expand(Block anchor, List<Block> list, int limit, Predicate<Block> predicate) {
-		if (list.size() >= limit) return;
+	private static void expand(Block anchor, List<Block> list, Set<BlockPosition> used, int limit, Predicate<Block> predicate) {
+		if (list.size() >= limit || used.size() >= limit) return;
+		
 		list.add(anchor);
+		BlockPosition anchorPosition = new BlockPosition(anchor);
+		used.add(anchorPosition);
 		
 		for (BlockFace face : faces) {
 			Block next = anchor.getRelative(face);
+			BlockPosition nextPosition = new BlockPosition(next);
 			
-			if (!list.contains(next) && predicate.test(next)) {
+			if (!list.contains(next) && !set.contains(nextPosition) && predicate.test(next)) {
 				expand(next, list, limit, predicate);
 			}
 		}
 	}
-	
 }
